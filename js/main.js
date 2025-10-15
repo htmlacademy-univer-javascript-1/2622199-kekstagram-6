@@ -1,61 +1,101 @@
-function randomInteger(min, max) {
-
-  const lower = Math.ceil(Math.min(min, max));
-
-  const upper = Math.floor(Math.max(min, max));
-
-  return Math.floor(lower + Math.random() * (upper - lower - 1));
-}
-
-function randomElement(elements) {
-  return elements[randomInteger(0, elements.length - 1)];
-}
-
-function idGeneration() {
-  let lastGeneratedId = 0;
-  return function() {
-    lastGeneratedId += 1;
-    return lastGeneratedId;
-  };
-}
-
-const generateCommentId = idGeneration();
-
-const names = ['Артем', 'Роман', 'Мария', 'Дмитрий', 'София', 'Иван', 'Анна', 'Кирилл', 'Ольга', 'Алексей', 'Екатерина'];
-
-const message = ['Всё отлично!',
+const MESSAGES = [
+  'Всё отлично!',
   'В целом всё неплохо. Но не всё.',
   'Когда вы делаете фотографию, хорошо бы убирать палец из кадра. В конце концов это просто непрофессионально.',
   'Моя бабушка случайно чихнула с фотоаппаратом в руках и у неё получилась фотография лучше.',
   'Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.',
-  'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'];
+  'Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!'
+];
 
-const description = ['Все чики-пуки!',
-  'В екате сегодня гололёд(',
-  'По секрету всему свету',
-  'В кругосветку!'];
+const NAMES = [
+  'Артём', 'Мария', 'Дмитрий', 'Анна', 'Сергей',
+  'Елена', 'Иван', 'Ольга', 'Алексей', 'Наталья'
+];
 
-function createComments() {
-  return {
-    id: generateCommentId,
-    avatar: 'img/avatar-' + randomInteger(1, 6) + '.svg',
-    message: Array.from({ length: randomInteger(1, 2) }, function() {return randomElement(message); }).join(' '),
-    name: randomElement(names)
+const DESCRIPTIONS = [
+  'Прекрасный закат на море',
+  'Горный пейзаж в утреннем тумане',
+  'Улочки старого города',
+  'Кофе в уютной кофейне',
+  'Прогулка по осеннему лесу',
+  'Архитектура современного мегаполиса',
+  'Морской причал с лодками',
+  'Цветущий сад весной',
+  'Зимняя сказка в горах',
+  'Уличный музыкант в метро'
+];
+
+const getRandomInteger = (min, max) => {
+  const lower = Math.ceil(Math.min(min, max));
+  const upper = Math.floor(Math.max(min, max));
+  return Math.floor(lower + Math.random() * (upper - lower + 1));
+};
+
+const getRandomArrayElement = (elements) => {
+  return elements[getRandomInteger(0, elements.length - 1)];
+};
+
+const createIdGenerator = () => {
+  let lastGeneratedId = 0;
+
+  return () => {
+    lastGeneratedId += 1;
+    return lastGeneratedId;
   };
-}
+};
 
-function createPhoto(index) {
+const generateCommentId = createIdGenerator();
+
+const createComment = () => {
+  const messageCount = getRandomInteger(1, 2);
+  let message = '';
+
+  for (let i = 0; i < messageCount; i++) {
+    message += getRandomArrayElement(MESSAGES);
+    if (i < messageCount - 1) {
+      message += ' ';
+    }
+  }
+
   return {
-    id: index + 1,
-    url: 'photos/' + (index + 1) + '.jpg',
-    description: randomElement(description),
-    likes: randomInteger(15, 200),
-    comments: Array.from({ length: randomInteger(0, 30) }, createComments)
+    id: generateCommentId(),
+    avatar: `img/avatar-${getRandomInteger(1, 6)}.svg`,
+    message: message,
+    name: getRandomArrayElement(NAMES)
   };
-}
+};
 
-function generatePhotosArray() {
-  return Array.from({ length: 25 }, function(_, index) { return createPhoto(index); });
-}
+const createComments = () => {
+  const commentsCount = getRandomInteger(0, 30);
+  const comments = [];
 
-const photos = generatePhotosArray();
+  for (let i = 0; i < commentsCount; i++) {
+    comments.push(createComment());
+  }
+
+  return comments;
+};
+
+const createPhoto = (index) => {
+  return {
+    id: index,
+    url: `photos/${index}.jpg`,
+    description: getRandomArrayElement(DESCRIPTIONS),
+    likes: getRandomInteger(15, 200),
+    comments: createComments()
+  };
+};
+
+const generatePhotosArray = () => {
+  const photos = [];
+
+  for (let i = 1; i <= 25; i++) {
+    photos.push(createPhoto(i));
+  }
+
+  return photos;
+};
+
+const photosArray = generatePhotosArray();
+
+console.log(photosArray);
