@@ -6,4 +6,3 @@ const photosArray = generatePhotosArray();
 console.log('Сгенерированный массив фотографий:', photosArray);
 
 export { photosArray };
-
