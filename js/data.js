@@ -53,3 +53,4 @@ const generatePhotosArray = () => {
 };
 
 export { generatePhotosArray, NAMES, MESSAGES };
+

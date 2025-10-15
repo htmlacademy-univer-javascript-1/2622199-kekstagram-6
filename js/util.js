@@ -35,3 +35,4 @@ const createComment = () => {
 };
 
 export { getRandomInteger, getRandomArrayElement, createIdGenerator, createComment };
+
