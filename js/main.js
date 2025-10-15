@@ -31,9 +31,7 @@ const getRandomInteger = (min, max) => {
   return Math.floor(lower + Math.random() * (upper - lower + 1));
 };
 
-const getRandomArrayElement = (elements) => {
-  return elements[getRandomInteger(0, elements.length - 1)];
-};
+const getRandomArrayElement = (elements) => elements[getRandomInteger(0, elements.length - 1)];
 
 const createIdGenerator = () => {
   let lastGeneratedId = 0;
@@ -76,15 +74,13 @@ const createComments = () => {
   return comments;
 };
 
-const createPhoto = (index) => {
-  return {
-    id: index,
-    url: `photos/${index}.jpg`,
-    description: getRandomArrayElement(DESCRIPTIONS),
-    likes: getRandomInteger(15, 200),
-    comments: createComments()
-  };
-};
+const createPhoto = (index) => ({
+  id: index,
+  url: `photos/${index}.jpg`,
+  description: getRandomArrayElement(DESCRIPTIONS),
+  likes: getRandomInteger(15, 200),
+  comments: createComments()
+});
 
 const generatePhotosArray = () => {
   const photos = [];
@@ -98,4 +94,5 @@ const generatePhotosArray = () => {
 
 const photosArray = generatePhotosArray();
 
+// eslint-disable-next-line no-console
 console.log(photosArray);
