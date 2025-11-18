@@ -1,4 +1,5 @@
-import { generatePhotosArray } from './modules/data.js';
+import { generatePhotosArray } from './data.js';
+import { renderThumbnails } from './pictures.js';
 
 const photosArray = generatePhotosArray();
 
@@ -7,3 +8,6 @@ console.log('Сгенерированный массив фотографий:',
 
 export { photosArray };
 
+document.addEventListener('DOMContentLoaded', () => {
+  renderThumbnails();
+});
