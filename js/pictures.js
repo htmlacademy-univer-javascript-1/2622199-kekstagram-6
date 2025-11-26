@@ -1,4 +1,8 @@
 import { generatePhotosArray } from './data.js';
+import { openFullPhoto } from './big-photo.js';
+
+// Сохраняем данные фотографий в глобальной переменной для доступа из обработчиков
+let photosData = [];
 
 // Функция для создания DOM-элемента на основе шаблона
 const createThumbnailElement = (photo) => {
@@ -19,7 +23,7 @@ const createThumbnailElement = (photo) => {
 
 // Функция для отрисовки всех миниатюр
 const renderThumbnails = () => {
-  const photos = generatePhotosArray(); // Получаем временные данные
+  photosData = generatePhotosArray(); // Сохраняем данные в глобальную переменную
   const picturesContainer = document.querySelector('.pictures');
   if (!picturesContainer) {
     return;
@@ -29,7 +33,7 @@ const renderThumbnails = () => {
   existingPictures.forEach((picture) => picture.remove());
   // Создаем DocumentFragment для эффективной вставки
   const fragment = document.createDocumentFragment();
-  photos.forEach((photo) => {
+  photosData.forEach((photo) => {
     const thumbnailElement = createThumbnailElement(photo);
     fragment.appendChild(thumbnailElement);
   });
@@ -37,4 +41,24 @@ const renderThumbnails = () => {
   picturesContainer.appendChild(fragment);
 };
 
-export { renderThumbnails };
+// Функция для инициализации обработчиков событий
+const initThumbnailsHandlers = () => {
+  const picturesContainer = document.querySelector('.pictures');
+  if (!picturesContainer) {
+    return;
+  }
+  // Используем делегирование событий для обработки кликов по миниатюрам
+  picturesContainer.addEventListener('click', (evt) => {
+    const thumbnail = evt.target.closest('.picture');
+    if (thumbnail) {
+      evt.preventDefault();
+      const photoId = parseInt(thumbnail.dataset.photoId, 10);
+      const photoData = photosData.find((photo) => photo.id === photoId);
+      if (photoData) {
+        openFullPhoto(photoData);
+      }
+    }
+  });
+};
+
+export { renderThumbnails, initThumbnailsHandlers };
