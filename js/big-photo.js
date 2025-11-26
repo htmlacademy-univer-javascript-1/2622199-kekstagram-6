@@ -4,6 +4,11 @@ const socialComments = bigPicture.querySelector('.social__comments');
 const commentsCount = bigPicture.querySelector('.social__comment-count');
 const commentsLoader = bigPicture.querySelector('.comments-loader');
 
+// Переменные для управления комментариями
+let currentComments = [];
+let commentsShown = 0;
+const COMMENTS_PER_PORTION = 5;
+
 // Функция для создания элемента комментария
 const createCommentElement = (comment) => {
   const commentElement = document.createElement('li');
@@ -19,28 +24,46 @@ const createCommentElement = (comment) => {
   return commentElement;
 };
 
-// Функция для отрисовки комментариев
-const renderComments = (comments) => {
-  socialComments.innerHTML = '';
-  comments.forEach((comment) => {
+// Функция для отрисовки порции комментариев
+const renderCommentsPortion = () => {
+  const commentsToShow = currentComments.slice(commentsShown, commentsShown + COMMENTS_PER_PORTION);
+  commentsToShow.forEach((comment) => {
     const commentElement = createCommentElement(comment);
     socialComments.appendChild(commentElement);
   });
+  commentsShown += commentsToShow.length;
+  // Обновляем счетчик комментариев
+  commentsCount.innerHTML = `${commentsShown} из <span class="comments-count">${currentComments.length}</span> комментариев`;
+  // Скрываем кнопку, если все комментарии показаны
+  if (commentsShown >= currentComments.length) {
+    commentsLoader.classList.add('hidden');
+  } else {
+    commentsLoader.classList.remove('hidden');
+  }
+};
+
+// Функция для сброса состояния комментариев
+const resetCommentsState = () => {
+  currentComments = [];
+  commentsShown = 0;
+  socialComments.innerHTML = '';
 };
 
 // Функция для открытия полноразмерного изображения
 const openFullPhoto = (photoData) => {
-  // Заполняем данные
+  resetCommentsState();
+  // Заполняем основные данные
   bigPicture.querySelector('.big-picture__img img').src = photoData.url;
   bigPicture.querySelector('.big-picture__img img').alt = photoData.description;
   bigPicture.querySelector('.likes-count').textContent = photoData.likes;
   bigPicture.querySelector('.comments-count').textContent = photoData.comments.length;
   bigPicture.querySelector('.social__caption').textContent = photoData.description;
-  // Отрисовываем комментарии
-  renderComments(photoData.comments);
-  // Скрываем блоки счётчика комментариев и загрузки новых комментариев
-  commentsCount.classList.add('hidden');
-  commentsLoader.classList.add('hidden');
+  // Сохраняем комментарии и отображаем первую порцию
+  currentComments = photoData.comments;
+  renderCommentsPortion();
+  // Показываем блоки счётчика комментариев и загрузки новых комментариев
+  commentsCount.classList.remove('hidden');
+  commentsLoader.classList.remove('hidden');
   // Показываем окно
   bigPicture.classList.remove('hidden');
   // Добавляем класс для body
@@ -51,7 +74,13 @@ const openFullPhoto = (photoData) => {
 const closeFullPhoto = () => {
   bigPicture.classList.add('hidden');
   document.body.classList.remove('modal-open');
+  resetCommentsState();
 };
+
+// Обработчик загрузки дополнительных комментариев
+commentsLoader.addEventListener('click', () => {
+  renderCommentsPortion();
+});
 
 // Обработчик закрытия по клику на кнопку
 closeButton.addEventListener('click', () => {
