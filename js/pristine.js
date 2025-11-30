@@ -440,7 +440,7 @@
     // eslint-disable-next-line no-prototype-builtins
     const langObj = lang.hasOwnProperty(locale) ? lang[locale] : lang[locale] = {};
 
-    Object.keys(messages).forEach((key, index) => {
+    Object.keys(messages).forEach((key) => {
       langObj[key] = messages[key];
     });
   };
