@@ -1,4 +1,4 @@
-import { loadPhotos } from './api-data.js'; // будет создан ниже
+import { loadPhotos } from './api-data.js';
 import {
   renderThumbnails,
   initThumbnailsHandlers,
@@ -7,7 +7,7 @@ import {
 } from './pictures.js';
 import { initForm } from './form.js';
 import { initScaleEditor } from './scale-photo.js';
-import { showAlert } from './alert.js'; // будет создан ниже
+import { showAlert } from './alert.js';
 
 // Переменная для хранения загруженных фотографий
 let photosArray = [];
@@ -25,7 +25,7 @@ const loadData = async () => {
     renderThumbnails();
     // Инициализируем обработчики
     initThumbnailsHandlers();
-    // Инициализируем фильтры
+    // Инициализируем фильтры (показывает блок фильтров)
     initFilters();
   } catch (error) {
     // eslint-disable-next-line no-console
@@ -33,9 +33,6 @@ const loadData = async () => {
     showAlert(error.message);
   }
 };
-
-// Экспортируем для отладки
-export { photosArray };
 
 // Инициализация приложения
 const initApp = async () => {
