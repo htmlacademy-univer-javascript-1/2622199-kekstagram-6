@@ -1,35 +1,59 @@
-import { generatePhotosArray } from './data.js';
-import { renderThumbnails, initThumbnailsHandlers } from './pictures.js';
+import { loadPhotos } from './api-data.js'; // будет создан ниже
+import {
+  renderThumbnails,
+  initThumbnailsHandlers,
+  initFilters,
+  setPhotosData
+} from './pictures.js';
 import { initForm } from './form.js';
 import { initScaleEditor } from './scale-photo.js';
+import { showAlert } from './alert.js'; // будет создан ниже
 
-const photosArray = generatePhotosArray();
+// Переменная для хранения загруженных фотографий
+let photosArray = [];
 
-// eslint-disable-next-line no-console
-console.log('Сгенерированный массив фотографий:', photosArray);
-
-export { photosArray };
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderThumbnails();
-});
-
-// Инициализация приложения
-const initApp = () => {
-  renderThumbnails();
-  initThumbnailsHandlers();
+// Загрузка данных с сервера
+const loadData = async () => {
+  try {
+    // Загружаем фото с сервера
+    photosArray = await loadPhotos();
+    // eslint-disable-next-line no-console
+    console.log('Данные загружены с сервера:', photosArray);
+    // Устанавливаем данные в модуль pictures
+    setPhotosData(photosArray);
+    // Отрисовываем миниатюры
+    renderThumbnails();
+    // Инициализируем обработчики
+    initThumbnailsHandlers();
+    // Инициализируем фильтры
+    initFilters();
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Ошибка загрузки данных:', error);
+    showAlert(error.message);
+  }
 };
 
-// Инициализация формы при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
-  initForm();
-});
-// Запускаем приложение после загрузки DOM
-document.addEventListener('DOMContentLoaded', initApp);
+// Экспортируем для отладки
+export { photosArray };
 
-// Ждем загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
+// Инициализация приложения
+const initApp = async () => {
+  // Инициализируем редактор масштаба
   initScaleEditor();
+  // Инициализируем форму
+  initForm();
+  // Загружаем данные с сервера
+  await loadData();
   // eslint-disable-next-line no-console
-  console.log('Scale editor initialized');
+  console.log('Приложение инициализировано');
+};
+
+// Запускаем приложение после загрузки DOM
+document.addEventListener('DOMContentLoaded', () => {
+  initApp().catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Ошибка инициализации приложения:', error);
+    showAlert('Не удалось инициализировать приложение');
+  });
 });
