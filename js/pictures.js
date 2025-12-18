@@ -78,6 +78,15 @@ const renderDiscussedPhotos = () => {
   renderThumbnails();
 };
 
+// Функция debounce (устранение дребезга)
+const debounce = (callback, timeoutDelay = 500) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
+
 // Инициализация фильтров
 const initFilters = () => {
   const filterButtons = document.querySelectorAll('.img-filters__button');
@@ -87,22 +96,25 @@ const initFilters = () => {
   }
   // Показываем блок фильтров
   filtersContainer.classList.remove('img-filters--inactive');
-  // Добавляем обработчики для кнопок фильтров
+  // Добавляем обработчики для кнопок фильтров с debounce
+  const debouncedRender = debounce((filter) => {
+    if (filter === 'filter-default') {
+      renderDefaultPhotos();
+    } else if (filter === 'filter-random') {
+      renderRandomPhotos();
+    } else if (filter === 'filter-discussed') {
+      renderDiscussedPhotos();
+    }
+  });
   filterButtons.forEach((button) => {
     button.addEventListener('click', () => {
       // Удаляем активный класс у всех кнопок
       filterButtons.forEach((btn) => btn.classList.remove('img-filters__button--active'));
       // Добавляем активный класс текущей кнопке
       button.classList.add('img-filters__button--active');
-      // Обрабатываем фильтр
+      // Обрабатываем фильтр с debounce
       const filter = button.id;
-      if (filter === 'filter-default') {
-        renderDefaultPhotos();
-      } else if (filter === 'filter-random') {
-        renderRandomPhotos();
-      } else if (filter === 'filter-discussed') {
-        renderDiscussedPhotos();
-      }
+      debouncedRender(filter);
     });
   });
   // Устанавливаем фильтр по умолчанию
