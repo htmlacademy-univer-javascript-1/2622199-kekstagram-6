@@ -5,129 +5,104 @@ const SCALE_DEFAULT = 55;
 
 let currentScale = SCALE_DEFAULT;
 let isSliderInitialized = false;
+let currentEffect = 'none';
 
-let uploadOverlay;
-let imagePreview;
-let scaleValueInput;
-let effectLevelInput;
-let effectSliderContainer;
-let effectRadios;
+const domElements = {
+  imagePreview: null,
+  scaleValueInput: null,
+  effectLevelInput: null,
+  effectSliderContainer: null,
+  effectRadios: null,
+  effectLevelElement: null,
+  scaleSmallerBtn: null,
+  scaleBiggerBtn: null
+};
 
 function initDOMElements() {
-  uploadOverlay = document.querySelector('.img-upload__overlay');
-  imagePreview = document.querySelector('.img-upload__preview img');
-  scaleValueInput = document.querySelector('.scale__control--value');
-  effectLevelInput = document.querySelector('.effect-level__value');
-  effectSliderContainer = document.querySelector('.effect-level__slider');
-  effectRadios = document.querySelectorAll('input[name="effect"]');
+  domElements.imagePreview = document.querySelector('.img-upload__preview img');
+  domElements.scaleValueInput = document.querySelector('.scale__control--value');
+  domElements.effectLevelInput = document.querySelector('.effect-level__value');
+  domElements.effectSliderContainer = document.querySelector('.effect-level__slider');
+  domElements.effectRadios = document.querySelectorAll('input[name="effect"]');
+  domElements.effectLevelElement = document.querySelector('.effect-level');
+  domElements.scaleSmallerBtn = document.querySelector('.scale__control--smaller');
+  domElements.scaleBiggerBtn = document.querySelector('.scale__control--bigger');
 }
 
 function initEffectSlider() {
-  if (!effectSliderContainer || isSliderInitialized) {
+  // Проверяем, подключена ли библиотека
+  if (typeof noUiSlider === 'undefined') {
+    // eslint-disable-next-line no-console
+    console.error('Библиотека noUiSlider не найдена. Убедитесь, что она подключена в HTML.');
     return;
   }
-
-  noUiSlider.create(effectSliderContainer, {
-    start: [100],
-    connect: 'lower',
-    range: {
-      'min': 0,
-      'max': 100
-    },
-    step: 1,
-    format: {
-      to: function(value) {
-        return Math.round(value);
-      },
-      from: function(value) {
-        return Number(value);
-      }
+  if (!domElements.effectSliderContainer) {
+    // eslint-disable-next-line no-console
+    console.warn('Элемент слайдера не найден');
+    return;
+  }
+  if (isSliderInitialized) {
+    return;
+  }
+  try {
+    // Уничтожаем предыдущий слайдер, если есть
+    if (domElements.effectSliderContainer.noUiSlider) {
+      domElements.effectSliderContainer.noUiSlider.destroy();
     }
-  });
-
-  isSliderInitialized = true;
-
-  effectSliderContainer.noUiSlider.on('update', (values) => {
-    const value = Math.round(values[0]);
-    updateEffectLevel(value);
-  });
-}
-
-function resetEffectSlider() {
-  if (!effectSliderContainer || !isSliderInitialized) {
-    return;
-  }
-
-  effectSliderContainer.closest('.effect-level').classList.add('hidden');
-  effectSliderContainer.noUiSlider.set(100);
-  if (effectLevelInput) {
-    effectLevelInput.value = '';
-  }
-}
-
-function updateEffectLevel(value) {
-  if (!effectLevelInput || !imagePreview) {
-    return;
-  }
-
-  effectLevelInput.value = value;
-
-  const selectedEffect = document.querySelector('input[name="effect"]:checked').value;
-  applyEffect(selectedEffect, value);
-}
-
-function applyEffect(effectName, level = 100) {
-  if (!imagePreview) {
-    return;
-  }
-
-  imagePreview.style.filter = '';
-
-  switch(effectName) {
-    case 'chrome':
-      imagePreview.style.filter = `grayscale(${level / 100})`;
-      break;
-    case 'sepia':
-      imagePreview.style.filter = `sepia(${level / 100})`;
-      break;
-    case 'marvin':
-      imagePreview.style.filter = `invert(${level}%)`;
-      break;
-    case 'phobos':
-      // eslint-disable-next-line no-case-declarations
-      const blurValue = (level / 100) * 3;
-      imagePreview.style.filter = `blur(${blurValue}px)`;
-      break;
-    case 'heat':
-      // eslint-disable-next-line no-case-declarations
-      const brightnessValue = 1 + (level / 100) * 2;
-      imagePreview.style.filter = `brightness(${brightnessValue})`;
-      break;
-    case 'none':
-    default:
-      imagePreview.style.filter = 'none';
-      break;
+    noUiSlider.create(domElements.effectSliderContainer, {
+      start: [100],
+      connect: 'lower',
+      range: {
+        min: 0,
+        max: 100
+      },
+      step: 1,
+      format: {
+        to: function(value) {
+          return Math.round(value);
+        },
+        from: function(value) {
+          return parseFloat(value);
+        }
+      }
+    });
+    isSliderInitialized = true;
+    domElements.effectSliderContainer.noUiSlider.on('update', (values) => {
+      const level = Math.round(values[0]);
+      if (domElements.effectLevelInput) {
+        domElements.effectLevelInput.value = level;
+      }
+      applyEffect(currentEffect, level);
+    });
+    // eslint-disable-next-line no-console
+    console.log('Слайдер эффектов успешно инициализирован');
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Ошибка при создании слайдера:', error);
   }
 }
 
 function updateScaleValue() {
-  if (scaleValueInput) {
-    scaleValueInput.value = `${currentScale}%`;
+  if (domElements.scaleValueInput) {
+    domElements.scaleValueInput.value = `${currentScale}%`;
   }
-
-  if (imagePreview) {
-    imagePreview.style.transform = `scale(${currentScale / 100})`;
+  if (domElements.imagePreview) {
+    domElements.imagePreview.style.transform = `scale(${currentScale / 100})`;
   }
 }
 
 function scaleDown() {
-  currentScale = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
-  updateScaleValue();
+  if (currentScale > SCALE_MIN) {
+    currentScale -= SCALE_STEP;
+    updateScaleValue();
+  }
 }
 
 function scaleUp() {
-  currentScale = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
-  updateScaleValue();
+  if (currentScale < SCALE_MAX) {
+    currentScale += SCALE_STEP;
+    updateScaleValue();
+  }
 }
 
 function resetScale() {
@@ -135,106 +110,112 @@ function resetScale() {
   updateScaleValue();
 }
 
+function applyEffect(effectName, level = 100) {
+  if (!domElements.imagePreview) {
+    return;
+  }
+  currentEffect = effectName;
+  let filterValue = 'none';
+  switch(effectName) {
+    case 'chrome':
+      filterValue = `grayscale(${level / 100})`;
+      break;
+    case 'sepia':
+      filterValue = `sepia(${level / 100})`;
+      break;
+    case 'marvin':
+      filterValue = `invert(${level}%)`;
+      break;
+    case 'phobos':
+      filterValue = `blur(${(level / 100) * 3}px)`;
+      break;
+    case 'heat':
+      filterValue = `brightness(${1 + (level / 100) * 2})`;
+      break;
+  }
+  domElements.imagePreview.style.filter = filterValue;
+}
+
+function onEffectChange(event) {
+  const selectedEffect = event.target.value;
+  if (selectedEffect === 'none') {
+    // Скрываем слайдер
+    if (domElements.effectLevelElement) {
+      domElements.effectLevelElement.classList.add('hidden');
+    }
+    // Сбрасываем эффект
+    applyEffect('none', 100);
+  } else {
+    // Показываем слайдер
+    if (domElements.effectLevelElement) {
+      domElements.effectLevelElement.classList.remove('hidden');
+    }
+    // Инициализируем слайдер если нужно
+    initEffectSlider();
+    // Устанавливаем слайдер на максимум
+    if (isSliderInitialized && domElements.effectSliderContainer.noUiSlider) {
+      domElements.effectSliderContainer.noUiSlider.set(100);
+    }
+    // Применяем эффект
+    applyEffect(selectedEffect, 100);
+  }
+}
+
 function initEventHandlers() {
-  const scaleSmallerBtn = document.querySelector('.scale__control--smaller');
-  const scaleBiggerBtn = document.querySelector('.scale__control--bigger');
-
-  if (scaleSmallerBtn) {
-    scaleSmallerBtn.addEventListener('click', scaleDown);
+  // Кнопки масштаба
+  if (domElements.scaleSmallerBtn) {
+    domElements.scaleSmallerBtn.addEventListener('click', scaleDown);
   }
-
-  if (scaleBiggerBtn) {
-    scaleBiggerBtn.addEventListener('click', scaleUp);
-  }
-
-  effectRadios.forEach((radio) => {
-    radio.addEventListener('change', function() {
-      resetScale();
-      resetEffectSlider();
-
-      if (this.value !== 'none') {
-        const effectSlider = effectSliderContainer.closest('.effect-level');
-        if (effectSlider) {
-          effectSlider.classList.remove('hidden');
-        }
-
-        if (!isSliderInitialized) {
-          initEffectSlider();
-        }
-
-        effectSliderContainer.noUiSlider.set(100);
-        updateEffectLevel(100);
-      } else {
-        applyEffect('none');
-      }
-    });
-  });
-
-  const uploadFileInput = document.getElementById('upload-file');
-  if (uploadFileInput) {
-    uploadFileInput.addEventListener('change', function() {
-      if (uploadOverlay) {
-        uploadOverlay.classList.remove('hidden');
-      }
-
-      resetScale();
-      resetEffectSlider();
-
-      const noneEffectRadio = document.getElementById('effect-none');
-      if (noneEffectRadio) {
-        noneEffectRadio.checked = true;
-        applyEffect('none');
-      }
-
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          if (imagePreview) {
-            imagePreview.src = e.target.result;
-          }
-        };
-        reader.readAsDataURL(this.files[0]);
-      }
-    });
-  }
-
-  const cancelBtn = document.getElementById('upload-cancel');
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', () => {
-      if (uploadOverlay) {
-        uploadOverlay.classList.add('hidden');
-      }
-
-      const uploadForm = document.getElementById('upload-select-image');
-      if (uploadForm) {
-        uploadForm.reset();
-      }
-
-      resetScale();
-      resetEffectSlider();
-
-      if (imagePreview) {
-        imagePreview.src = 'img/upload-default-image.jpg';
-        imagePreview.style.filter = '';
-        imagePreview.style.transform = '';
-      }
+  if (domElements.scaleBiggerBtn) {
+    domElements.scaleBiggerBtn.addEventListener('click', scaleUp);
+  }  // Радиокнопки эффектов
+  if (domElements.effectRadios && domElements.effectRadios.length > 0) {
+    domElements.effectRadios.forEach((radio) => {
+      radio.addEventListener('change', onEffectChange);
     });
   }
 }
 
-// Основная функция инициализации
-export function initScaleEditor() {
+function resetEditor() {
+  // Сбрасываем масштаб
+  resetScale();
+  // Сбрасываем эффект
+  currentEffect = 'none';
+  // Скрываем слайдер
+  if (domElements.effectLevelElement) {
+    domElements.effectLevelElement.classList.add('hidden');
+  }
+  // Сбрасываем фильтр изображения
+  if (domElements.imagePreview) {
+    domElements.imagePreview.style.filter = 'none';
+  }
+  // Устанавливаем радио "none"
+  const noneRadio = document.querySelector('#effect-none');
+  if (noneRadio) {
+    noneRadio.checked = true;
+  }
+}
+
+function initScaleEditor() {
   initDOMElements();
+  if (!domElements.imagePreview) {
+    // eslint-disable-next-line no-console
+    console.error('Не найден элемент изображения для превью');
+    return;
+  }
+  // Инициализируем масштаб
   updateScaleValue();
-  resetEffectSlider();
+  // Инициализируем обработчики
   initEventHandlers();
+  // Сбрасываем состояние
+  resetEditor();
 }
 
-// Экспорт функций для внешнего использования
 export {
+  initScaleEditor,
   scaleDown,
   scaleUp,
   resetScale,
   applyEffect,
-  updateEffectLevel
+  resetEditor
 };

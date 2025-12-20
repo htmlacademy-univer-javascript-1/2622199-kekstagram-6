@@ -36,21 +36,25 @@ const loadData = async () => {
 
 // Инициализация приложения
 const initApp = async () => {
-  // Инициализируем редактор масштаба
-  initScaleEditor();
-  // Инициализируем форму
-  initForm();
-  // Загружаем данные с сервера
-  await loadData();
-  // eslint-disable-next-line no-console
-  console.log('Приложение инициализировано');
+  try {
+    // Инициализируем редактор масштаба
+    initScaleEditor();
+    // Инициализируем форму
+    initForm();
+    // Загружаем данные с сервера
+    await loadData();
+    // eslint-disable-next-line no-console
+    console.log('Приложение инициализировано');
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('Ошибка при инициализации:', error);
+    showAlert('Ошибка при инициализации приложения');
+  }
 };
 
 // Запускаем приложение после загрузки DOM
-document.addEventListener('DOMContentLoaded', () => {
-  initApp().catch((error) => {
-    // eslint-disable-next-line no-console
-    console.error('Ошибка инициализации приложения:', error);
-    showAlert('Не удалось инициализировать приложение');
-  });
-});
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp);
+} else {
+  initApp();
+}
