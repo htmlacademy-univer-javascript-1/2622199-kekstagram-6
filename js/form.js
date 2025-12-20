@@ -1,5 +1,6 @@
 import { sendData } from './api.js';
 import { showAlert } from './alert.js';
+import { resetScale, applyEffect } from './scale-photo.js';
 
 // Элементы формы
 const form = document.querySelector('.img-upload__form');
@@ -12,6 +13,7 @@ const submitButton = document.querySelector('#upload-submit');
 
 let pristine = null;
 let isSubmitting = false;
+let currentFileUrl = null;
 
 // Инициализация Pristine для валидации
 const initPristine = () => {
@@ -112,6 +114,14 @@ const openForm = () => {
   // eslint-disable-next-line no-use-before-define
   document.addEventListener('keydown', onDocumentKeydown);
   updateSubmitButtonState();
+  // Устанавливаем эффект "none" при открытии формы
+  setTimeout(() => {
+    const noneEffectRadio = document.querySelector('#effect-none');
+    if (noneEffectRadio) {
+      noneEffectRadio.checked = true;
+      applyEffect('none');
+    }
+  }, 100);
 };
 
 // Закрытие формы редактирования
@@ -136,10 +146,8 @@ const resetForm = () => {
     fileInput.value = '';
   }
 
-  const originalEffect = document.querySelector('#effect-none');
-  if (originalEffect) {
-    originalEffect.checked = true;
-  }
+  // Сбрасываем масштаб
+  resetScale();
 
   const scaleInput = document.querySelector('.scale__control--value');
   if (scaleInput) {
@@ -158,9 +166,21 @@ const resetForm = () => {
 
   const imagePreview = document.querySelector('.img-upload__preview img');
   if (imagePreview) {
-    imagePreview.src = 'img/upload-default-image.jpg';
+    // ВАЖНО: Не сбрасываем на дефолтное изображение!
+    if (currentFileUrl) {
+      imagePreview.src = currentFileUrl;
+    } else {
+      imagePreview.src = 'img/upload-default-image.jpg';
+    }
+    // Сбрасываем фильтры и трансформации
     imagePreview.style.filter = '';
     imagePreview.style.transform = '';
+  }
+
+  // Сбрасываем эффект на "none"
+  const noneEffectRadio = document.querySelector('#effect-none');
+  if (noneEffectRadio) {
+    noneEffectRadio.checked = true;
   }
 
   isSubmitting = false;
@@ -207,7 +227,8 @@ const onFormSubmit = async (evt) => {
     await sendData(formData);
     // Показываем сообщение об успехе
     showAlert('Фотография успешно загружена!', 'success');
-    // Сбрасываем форму
+    // Полностью сбрасываем форму, включая загруженное изображение
+    currentFileUrl = null;
     resetForm();
     closeForm();
   } catch (error) {
@@ -241,7 +262,9 @@ const onFileInputChange = () => {
     reader.onload = (e) => {
       const imagePreview = document.querySelector('.img-upload__preview img');
       if (imagePreview) {
-        imagePreview.src = e.target.result;
+        // Сохраняем URL загруженного файла
+        currentFileUrl = e.target.result;
+        imagePreview.src = currentFileUrl;
       }
     };
     reader.readAsDataURL(file);
