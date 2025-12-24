@@ -52,7 +52,9 @@ const validateComment = (value) => value.length <= MAX_COMMENT_LENGTH;
 
 // Функция для обновления состояния кнопки
 const updateSubmitButton = () => {
-  submitButton.disabled = !pristine.validate();
+  // Проверяем валидность всей формы
+  const isValid = pristine.validate();
+  submitButton.disabled = !isValid;
 };
 
 // Блокировка/разблокировка кнопки отправки
