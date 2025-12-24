@@ -4,15 +4,16 @@ const MAX_HASHTAG_LENGTH = 20;
 
 // ВАЛИДАЦИЯ ХЭШ-ТЕГОВ
 const validateHashtags = (value) => {
+  // Убираем пробелы в начале и конце
   const trimmedValue = value.trim();
-  // Если поле пустое - валидно (необязательное поле)
+  // Если поле пустое - валидно (тест: "Хэш-теги необязательны")
   if (trimmedValue === '') {
     return true;
   }
 
-  const hashtags = trimmedValue.split(/\s+/).filter(Boolean);
-
-  // Проверка максимального количества
+  // Разбиваем на отдельные хэштеги
+  const hashtags = trimmedValue.split(/\s+/);
+  // Проверяем количество хэштегов
   if (hashtags.length > MAX_HASHTAGS_COUNT) {
     return false;
   }
@@ -20,6 +21,7 @@ const validateHashtags = (value) => {
   const seen = new Set();
 
   for (const hashtag of hashtags) {
+    // Приводим к нижнему регистру для проверки дубликатов
     const lowerCaseHashtag = hashtag.toLowerCase();
 
     // Хэштег не может состоять только из решетки
@@ -32,17 +34,20 @@ const validateHashtags = (value) => {
       return false;
     }
 
-    // Проверка формата: после # только буквы/цифры
-    if (!/^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/.test(hashtag)) {
-      return false;
-    }
-
-    // Проверка максимальной длины
+    // Проверяем длину хэштега
     if (hashtag.length > MAX_HASHTAG_LENGTH) {
       return false;
     }
 
-    // Проверка на повторение (без учета регистра)
+    // Проверяем формат: после # только буквы и цифры (включая кириллицу)
+    // Регулярное выражение: ^# - начинается с #
+    // [A-Za-zА-Яа-яЁё0-9] - буквы (латиница + кириллица) и цифры
+    // {1,19} - от 1 до 19 символов (вместе с # максимум 20)
+    if (!/^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/.test(hashtag)) {
+      return false;
+    }
+
+    // Проверяем на дубликаты (без учета регистра)
     if (seen.has(lowerCaseHashtag)) {
       return false;
     }
@@ -60,7 +65,7 @@ const getHashtagErrorMessage = (value) => {
     return '';
   }
 
-  const hashtags = trimmedValue.split(/\s+/).filter(Boolean);
+  const hashtags = trimmedValue.split(/\s+/);
   const seen = new Set();
 
   // Проверка на максимальное количество
@@ -81,14 +86,14 @@ const getHashtagErrorMessage = (value) => {
       return 'Хэш-тег должен начинаться с символа #';
     }
 
-    // Проверка формата
-    if (!/^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/.test(hashtag)) {
-      return 'Хэш-тег должен содержать только буквы и цифры после #';
-    }
-
     // Проверка максимальной длины
     if (hashtag.length > MAX_HASHTAG_LENGTH) {
       return `Максимальная длина хэш-тега - ${MAX_HASHTAG_LENGTH} символов (включая #)`;
+    }
+
+    // Проверка формата
+    if (!/^#[A-Za-zА-Яа-яЁё0-9]{1,19}$/.test(hashtag)) {
+      return 'Хэш-тег должен содержать только буквы и цифры после #';
     }
 
     // Проверка на повторение (без учета регистра)
