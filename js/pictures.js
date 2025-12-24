@@ -1,140 +1,38 @@
-import { openFullPhoto } from './big-photo.js';
-import { getPhotos, getRandomPhotos, getDiscussedPhotos } from './api-data.js';
+import { openBigPicture } from './big-picture.js';
+const pictures = document.querySelector('.pictures');
+const pictureTemplate = document.querySelector('#picture').content.querySelector('.picture');
 
-// Сохраняем данные фотографий в глобальной переменной
-let photosData = [];
+const renderPicture = (picture)=>{
+  const {url, description, comments, likes} = picture;
+  const pictureElement = pictureTemplate.cloneNode(true);
 
-// Функция для создания DOM-элемента на основе шаблона
-const createThumbnailElement = (photo) => {
-  const template = document.querySelector('#picture').content.querySelector('.picture');
-  const thumbnailElement = template.cloneNode(true);
-  const image = thumbnailElement.querySelector('.picture__img');
-  const likes = thumbnailElement.querySelector('.picture__likes');
-  const comments = thumbnailElement.querySelector('.picture__comments');
-  // Заполняем данные
-  image.src = photo.url;
-  image.alt = photo.description;
-  likes.textContent = photo.likes;
-  comments.textContent = photo.comments.length;
-  // Добавляем данные фото в элемент
-  thumbnailElement.dataset.photoId = photo.id;
-  return thumbnailElement;
+  pictureElement.querySelector('.picture__img').src = url;
+  pictureElement.querySelector('.picture__img').alt = description;
+  pictureElement.querySelector('.picture__comments').textContent = comments.length;
+  pictureElement.querySelector('.picture__likes').textContent = likes;
+
+  pictureElement.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    openBigPicture(picture);
+  });
+
+  return pictureElement;
 };
 
-// Функция для отрисовки миниатюр
-const renderThumbnails = (photos = null) => {
-  const picturesContainer = document.querySelector('.pictures');
-  if (!picturesContainer) {
-    return;
-  }
-  // Используем переданные фото или берем из глобального состояния
-  const photosToRender = photos || photosData;
-  // Очищаем контейнер
-  const existingPictures = picturesContainer.querySelectorAll('.picture');
-  existingPictures.forEach((picture) => picture.remove());
-  // Создаем DocumentFragment для эффективной вставки
+const renderPictures = (objects)=>{
   const fragment = document.createDocumentFragment();
-  photosToRender.forEach((photo) => {
-    const thumbnailElement = createThumbnailElement(photo);
-    fragment.appendChild(thumbnailElement);
-  });
-  // Вставляем все элементы
-  picturesContainer.appendChild(fragment);
-};
-
-// Функция для инициализации обработчиков событий
-const initThumbnailsHandlers = () => {
-  const picturesContainer = document.querySelector('.pictures');
-  if (!picturesContainer) {
-    return;
+  for (let i = 0; i<objects.length; i++){
+    fragment.appendChild(renderPicture(objects[i]));
   }
-  // Используем делегирование событий для обработки кликов по миниатюрам
-  picturesContainer.addEventListener('click', (evt) => {
-    const thumbnail = evt.target.closest('.picture');
-    if (thumbnail) {
-      evt.preventDefault();
-      const photoId = parseInt(thumbnail.dataset.photoId, 10);
-      const photoData = photosData.find((photo) => photo.id === photoId);
-      if (photoData) {
-        openFullPhoto(photoData);
-      }
-    }
-  });
+  pictures.appendChild(fragment);
 };
 
-// Функции для фильтрации
-const renderDefaultPhotos = () => {
-  photosData = getPhotos();
-  renderThumbnails();
-};
+const photos = pictures.getElementsByClassName('picture');
 
-const renderRandomPhotos = () => {
-  photosData = getRandomPhotos(10);
-  renderThumbnails();
-};
-
-const renderDiscussedPhotos = () => {
-  photosData = getDiscussedPhotos();
-  renderThumbnails();
-};
-
-// Функция debounce (устранение дребезга)
-const debounce = (callback, timeoutDelay = 500) => {
-  let timeoutId;
-  return (...rest) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
-  };
-};
-
-// Инициализация фильтров
-const initFilters = () => {
-  const filterButtons = document.querySelectorAll('.img-filters__button');
-  const filtersContainer = document.querySelector('.img-filters');
-  if (!filtersContainer || filterButtons.length === 0) {
-    return;
-  }
-  // Показываем блок фильтров
-  filtersContainer.classList.remove('img-filters--inactive');
-  // Добавляем обработчики для кнопок фильтров с debounce
-  const debouncedRender = debounce((filter) => {
-    if (filter === 'filter-default') {
-      renderDefaultPhotos();
-    } else if (filter === 'filter-random') {
-      renderRandomPhotos();
-    } else if (filter === 'filter-discussed') {
-      renderDiscussedPhotos();
-    }
-  });
-  filterButtons.forEach((button) => {
-    button.addEventListener('click', () => {
-      // Удаляем активный класс у всех кнопок
-      filterButtons.forEach((btn) => btn.classList.remove('img-filters__button--active'));
-      // Добавляем активный класс текущей кнопке
-      button.classList.add('img-filters__button--active');
-      // Обрабатываем фильтр с debounce
-      const filter = button.id;
-      debouncedRender(filter);
-    });
-  });
-  // Устанавливаем фильтр по умолчанию
-  const defaultButton = document.getElementById('filter-default');
-  if (defaultButton) {
-    defaultButton.classList.add('img-filters__button--active');
+const removePictures = ()=>{
+  if (photos){
+    [...photos].forEach((photo) => photo.remove());
   }
 };
 
-// Функция для установки фотографий (используется при загрузке)
-const setPhotosData = (photos) => {
-  photosData = photos;
-};
-
-export {
-  renderThumbnails,
-  initThumbnailsHandlers,
-  initFilters,
-  setPhotosData,
-  renderDefaultPhotos,
-  renderRandomPhotos,
-  renderDiscussedPhotos
-};
+export {renderPictures, removePictures};
