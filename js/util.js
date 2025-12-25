@@ -1,23 +1,20 @@
 const DELAY = 500;
 
-// Функция для проверки нажатия Escape
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-// Функция для устранения дребезга
 const debounce = (cb) => {
-  let lustTimeout = null;
+  let lastTimeout = null;
 
   return (...rest) => {
-    if (lustTimeout){
-      window.clearTimeout(lustTimeout);
+    if (lastTimeout){
+      window.clearTimeout(lastTimeout);
     }
-    lustTimeout = window.setTimeout(()=>{
+    lastTimeout = window.setTimeout(()=>{
       cb(...rest);
     }, DELAY);
   };
 };
 
-// Функция для перемешивания массива (shuffle)
 const shuffleArray = (array) => {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {

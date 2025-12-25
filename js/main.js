@@ -5,16 +5,15 @@ import './form.js';
 
 let photos = [];
 
-// Функция успешной загрузки
 const onSuccess = (data) => {
   photos = data.slice();
   renderPictures(photos);
   document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
-// Функция ошибки загрузки
 const onFail = () => {
   const messageAlert = document.createElement('div');
+  messageAlert.className = 'data-error';
   messageAlert.style.position = 'fixed';
   messageAlert.style.top = '20px';
   messageAlert.style.left = '50%';
@@ -31,7 +30,6 @@ const onFail = () => {
   document.body.append(messageAlert);
 };
 
-// Загружаем данные с сервера
 loadData(onSuccess, onFail);
 
 const getPhotos = () => photos.slice();

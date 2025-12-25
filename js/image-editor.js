@@ -44,7 +44,6 @@ const applyEffect = (value) => {
   imagePreview.style.filter = `${settings.filter}(${value}${settings.unit})`;
 };
 
-// МАСШТАБИРОВАНИЕ
 const updateScale = (value) => {
   currentScale = value;
 
@@ -53,19 +52,16 @@ const updateScale = (value) => {
   imagePreview.style.transform = `scale(${value / 100})`;
 };
 
-// Уменьшение масштаба
 const onScaleSmallerClick = () => {
   const newValue = Math.max(currentScale - SCALE_STEP, SCALE_MIN);
   updateScale(newValue);
 };
 
-// Увеличение масштаба
 const onScaleBiggerClick = () => {
   const newValue = Math.min(currentScale + SCALE_STEP, SCALE_MAX);
   updateScale(newValue);
 };
 
-// Сброс масштаба
 const resetScale = () => {
   updateScale(SCALE_DEFAULT);
 };
@@ -76,8 +72,6 @@ const initScale = () => {
   resetScale();
 };
 
-//ЭФФЕКТЫ
-// Инициализация слайдера
 const initSlider = () => {
   if (typeof noUiSlider === 'undefined') {
     return;
@@ -91,7 +85,6 @@ const initSlider = () => {
     return;
   }
 
-  // Создаем слайдер
   noUiSlider.create(effectLevelSlider, {
     range: {
       min: 0,
@@ -127,10 +120,8 @@ const updateSlider = (effectName) => {
   currentEffect = effectName;
 
   if (effectName === 'none') {
-    // Для эффекта "Оригинал" скрываем слайдер
     effectLevel.classList.add('hidden');
     imagePreview.style.filter = 'none';
-    // Сбрасываем значение поля
     effectLevelValue.value = '';
     return;
   }
@@ -160,7 +151,6 @@ const onEffectChange = (evt) => {
   }
 };
 
-// Сброс эффектов
 const resetEffects = () => {
   currentEffect = 'none';
   imagePreview.style.filter = 'none';
@@ -172,7 +162,6 @@ const resetEffects = () => {
     noneEffect.checked = true;
   }
 
-  // Сбрасываем слайдер к начальному состоянию
   if (effectLevelSlider.noUiSlider) {
     effectLevelSlider.noUiSlider.updateOptions({
       range: { min: 0, max: 100 },
@@ -188,14 +177,11 @@ const initEffects = () => {
   resetEffects();
 };
 
-// ОБЩИЕ ФУНКЦИИ
-// Инициализация всего редактора изображения
 const initImageEditor = () => {
   initScale();
   initEffects();
 };
 
-// Сброс всего редактора изображения
 const resetImageEditor = () => {
   resetScale();
   resetEffects();
