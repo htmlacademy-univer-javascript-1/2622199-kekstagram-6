@@ -171,7 +171,6 @@ const showSuccessMessage = () => {
   document.addEventListener('keydown', onEsc);
 };
 
-// Показать сообщение об ошибке
 const showErrorMessage = () => {
   const template = document.querySelector('#error').content.cloneNode(true);
   const message = template.querySelector('.error');
