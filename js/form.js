@@ -180,7 +180,6 @@ const onDocumentKeydown = (evt) => {
   }
 };
 
-// Обработчик отправки формы с AJAX
 const onFormSubmit = async (evt) => {
   evt.preventDefault();
   if (!pristine || isSubmitting) {
