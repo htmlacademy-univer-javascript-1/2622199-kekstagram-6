@@ -167,7 +167,6 @@ const resetForm = () => {
   updateSubmitButtonState();
 };
 
-// Обработчик клавиатуры
 const onDocumentKeydown = (evt) => {
   if (evt.key === 'Escape' && !isSubmitting) {
     evt.preventDefault();
