@@ -10,8 +10,6 @@ const imgFiltersForm = imgFilters.querySelector('.img-filters__form');
 
 const isButton = (evt) => evt.target.tagName === 'BUTTON';
 
-
-// Доступные фильтры
 const availableFilters = {
   'filter-default': () => getPhotos(),
   'filter-random': () => {
@@ -23,17 +21,13 @@ const availableFilters = {
   )
 };
 
-// Обработчик клика по форме фильтров
 const onImgFilterFormClick = debounce((evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
-    // Удаляем старые фотографии
     removePictures();
-    // Рендерим новые фотографии
     renderPictures(availableFilters[evt.target.id]());
   }
 });
 
-// Обработчик клика по кнопке
 const onButtonClick = (evt) => {
   if (isButton(evt) && availableFilters[evt.target.id]) {
     const selectedButton = imgFiltersForm.querySelector(`.${ACTIVE_BUTTON_CLASS}`);
