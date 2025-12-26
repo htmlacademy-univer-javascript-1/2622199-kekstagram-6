@@ -1,60 +1,39 @@
-import { loadPhotos } from './api-data.js';
-import {
-  renderThumbnails,
-  initThumbnailsHandlers,
-  initFilters,
-  setPhotosData
-} from './pictures.js';
-import { initForm } from './form.js';
-import { initScaleEditor } from './scale-photo.js';
-import { showAlert } from './alert.js';
+import { loadData } from './fetch.js';
+import { renderPictures } from './pictures.js';
+import './filters.js';
+import './form.js';
 
-// Переменная для хранения загруженных фотографий
-let photosArray = [];
+let photos = [];
 
-// Загрузка данных с сервера
-const loadData = async () => {
-  try {
-    // Загружаем фото с сервера
-    photosArray = await loadPhotos();
-    // eslint-disable-next-line no-console
-    console.log('Данные загружены с сервера:', photosArray);
-    // Устанавливаем данные в модуль pictures
-    setPhotosData(photosArray);
-    // Отрисовываем миниатюры
-    renderThumbnails();
-    // Инициализируем обработчики
-    initThumbnailsHandlers();
-    // Инициализируем фильтры (показывает блок фильтров)
-    initFilters();
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Ошибка загрузки данных:', error);
-    showAlert(error.message);
-  }
+const onSuccess = (data) => {
+  photos = data.slice();
+  renderPictures(photos);
+  document.querySelector('.img-filters').classList.remove('img-filters--inactive');
 };
 
-// Инициализация приложения
-const initApp = async () => {
-  try {
-    // Инициализируем редактор масштаба
-    initScaleEditor();
-    // Инициализируем форму
-    initForm();
-    // Загружаем данные с сервера
-    await loadData();
-    // eslint-disable-next-line no-console
-    console.log('Приложение инициализировано');
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('Ошибка при инициализации:', error);
-    showAlert('Ошибка при инициализации приложения');
-  }
+// Функция ошибки загрузки
+const onFail = () => {
+  const messageAlert = document.createElement('div');
+  messageAlert.className = 'data-error';
+  messageAlert.style.position = 'fixed';
+  messageAlert.style.top = '20px';
+  messageAlert.style.left = '50%';
+  messageAlert.style.transform = 'translateX(-50%)';
+  messageAlert.style.backgroundColor = '#ee3939ff';
+  messageAlert.style.color = 'white';
+  messageAlert.style.padding = '30px 50px';
+  messageAlert.style.borderRadius = '8px';
+  messageAlert.style.zIndex = '10000';
+  messageAlert.style.textAlign = 'center';
+  messageAlert.style.fontSize = '20px';
+  messageAlert.style.fontFamily = 'Arial, sans-serif';
+  messageAlert.textContent = 'Ошибка загрузки фотографий!';
+  document.body.append(messageAlert);
 };
 
-// Запускаем приложение после загрузки DOM
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initApp);
-} else {
-  initApp();
-}
+// Загружаем данные с сервера
+loadData(onSuccess, onFail);
+
+const getPhotos = () => photos.slice();
+
+export { getPhotos };
