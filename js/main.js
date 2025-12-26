@@ -5,7 +5,6 @@ import './form.js';
 
 let photos = [];
 
-// Функция успешной загрузки
 const onSuccess = (data) => {
   photos = data.slice();
   renderPictures(photos);
