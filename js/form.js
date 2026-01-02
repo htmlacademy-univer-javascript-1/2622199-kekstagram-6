@@ -180,7 +180,6 @@ function showErrorMessage() {
   function closeErrorMessage() {
     message.remove();
     document.removeEventListener('keydown', onErrorMessageEscKeydown);
-    // Возвращаем обработчик ESC для формы
     document.addEventListener('keydown', onDocumentKeydown);
   }
 
