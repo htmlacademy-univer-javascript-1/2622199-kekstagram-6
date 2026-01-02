@@ -7,13 +7,14 @@ import { showSelectedImage, resetPreview } from './preview.js';
 const MAX_COMMENT_LENGTH = 140;
 
 const form = document.querySelector('.img-upload__form');
-const fileInput = document.querySelector('.img-upload__input');
-const overlay = document.querySelector('.img-upload__overlay');
-const cancelButton = document.querySelector('.img-upload__cancel');
-const hashtagInput = document.querySelector('.text__hashtags');
-const commentInput = document.querySelector('.text__description');
+const fileInput = form.querySelector('.img-upload__input');
+const overlay = form.querySelector('.img-upload__overlay');
+const cancelButton = form.querySelector('.img-upload__cancel');
+const hashtagInput = form.querySelector('.text__hashtags');
+const commentInput = form.querySelector('.text__description');
+const submitButton = form.querySelector('.img-upload__submit');
+
 const body = document.body;
-const submitButton = document.querySelector('.img-upload__submit');
 
 let hashtagError = '';
 let commentError = '';
@@ -223,11 +224,11 @@ const onFormSubmit = (evt) => {
   }
 };
 
-const onHashtagInput = () => {
+const handleHashtagInput = () => {
   validateForm();
 };
 
-const onCommentInput = () => {
+const handleCommentInput = () => {
   validateForm();
 };
 
@@ -247,8 +248,8 @@ const setupEventListeners = () => {
   fileInput.addEventListener('change', onFileInputChange);
   cancelButton.addEventListener('click', onImageEditorClose);
   form.addEventListener('submit', onFormSubmit);
-  hashtagInput.addEventListener('input', onHashtagInput);
-  commentInput.addEventListener('input', onCommentInput);
+  hashtagInput.addEventListener('input', handleHashtagInput);
+  commentInput.addEventListener('input', handleCommentInput);
   hashtagInput.addEventListener('keydown', onHashtagInputKeydown);
   commentInput.addEventListener('keydown', onCommentInputKeydown);
 };
